@@ -60,6 +60,19 @@ public class Menu2 {
 
         scanner.close();
     }
+    
+    
+    private int lerInteiro(String mensagem) {
+        while (true) {
+            System.out.print(mensagem);
+            try {
+                int valor = Integer.parseInt(scanner.nextLine());
+                return valor;
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida! Digite um número inteiro válido, referente ao ID.");
+            }
+        }
+    }
 
     private void adicionarEstudante() {
         System.out.print("Nome do estudante: ");
@@ -79,16 +92,13 @@ public class Menu2 {
                 System.out.println((i + 1) + " - " + cursosDisponíveis.get(i));
             }
 
-            System.out.print("Escolha o número do curso: ");
-            int escolhaCurso = scanner.nextInt();
-            scanner.nextLine();
+            int escolhaCurso = lerInteiro("Escolha o número do curso: ");
 
             if (escolhaCurso >= 1 && escolhaCurso <= cursosDisponíveis.size()) {
                 String nomeCursoEscolhido = cursosDisponíveis.get(escolhaCurso - 1);
                 int idCursoEscolhido = bancoDeDados.getIdCursoPeloNome(nomeCursoEscolhido);
                 Estudante2 estudante = new Estudante2(nome, nomeCursoEscolhido, idCursoEscolhido);
                 gerenciamento.adicionarEstudante(estudante);
-               
             } else {
                 System.out.println("Escolha de curso inválida.");
             }
@@ -116,9 +126,7 @@ public class Menu2 {
             System.out.println("ID: " + estudante.getIdAluno() + " - Nome: " + estudante.getNomeAluno());
         }
 
-        System.out.print("Digite o ID do estudante a ser editado: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
+        int id = lerInteiro("Digite o ID do estudante a ser editado: ");
 
         Estudante2 estudanteExistente = buscarEstudante(id, estudantes);
         if (estudanteExistente == null) {
@@ -129,7 +137,6 @@ public class Menu2 {
         System.out.print("Novo nome do estudante: ");
         String novoNome = scanner.nextLine();
 
-        
         List<String> cursosDisponíveis;
         try {
             cursosDisponíveis = bancoDeDados.listarCursos();
@@ -141,24 +148,30 @@ public class Menu2 {
                     System.out.println((i + 1) + " - " + cursosDisponíveis.get(i));
                 }
 
-                System.out.print("Escolha o número do novo curso (ou pressione Enter para manter o curso atual): ");
-                String escolhaCursoStr = scanner.nextLine();
                 int novoIdCurso = -1;
-                if (!escolhaCursoStr.isEmpty()) {
-                    int escolhaCurso = Integer.parseInt(escolhaCursoStr);
-                    if (escolhaCurso >= 1 && escolhaCurso <= cursosDisponíveis.size()) {
-                        String nomeCursoEscolhido = cursosDisponíveis.get(escolhaCurso - 1);
-                        novoIdCurso = bancoDeDados.getIdCursoPeloNome(nomeCursoEscolhido);
+                while (novoIdCurso == -1) {
+                    System.out.print("Escolha o número do novo curso (ou pressione Enter para manter o curso atual): ");
+                    String escolhaCursoStr = scanner.nextLine();
+                    if (escolhaCursoStr.isEmpty()) {
+                        novoIdCurso = estudanteExistente.getIdCurso();
                     } else {
-                        System.out.println("Escolha de curso inválida. O curso atual será mantido.");
+                        try {
+                            int escolhaCurso = Integer.parseInt(escolhaCursoStr);
+                            if (escolhaCurso >= 1 && escolhaCurso <= cursosDisponíveis.size()) {
+                                String nomeCursoEscolhido = cursosDisponíveis.get(escolhaCurso - 1);
+                                novoIdCurso = bancoDeDados.getIdCursoPeloNome(nomeCursoEscolhido);
+                            } else {
+                                System.out.println("Escolha de curso inválida. O curso atual será mantido.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida. Digite um número inteiro válido.");
+                        }
                     }
-                } else {
-                    novoIdCurso = estudanteExistente.getIdCurso();
                 }
 
                 try {
                     gerenciamento.editarEstudante(id, novoNome, novoIdCurso);
-                    
+                    System.out.println("Estudante atualizado com sucesso!");
                 } catch (SQLException e) {
                     System.out.println("Erro ao editar estudante: " + e.getMessage());
                 }
@@ -167,7 +180,6 @@ public class Menu2 {
             System.out.println("Erro ao listar cursos: " + e.getMessage());
         }
     }
-
     private void removerEstudante() {
         List<Estudante2> estudantes;
         try {
@@ -187,9 +199,7 @@ public class Menu2 {
             System.out.println("ID: " + estudante.getIdAluno() + " - Nome: " + estudante.getNomeAluno());
         }
 
-        System.out.print("Digite o ID do estudante a ser removido: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
+        int id = lerInteiro("Digite o ID do estudante a ser removido: ");
 
         Estudante2 estudanteExistente = buscarEstudante(id, estudantes);
         if (estudanteExistente == null) {
@@ -199,7 +209,7 @@ public class Menu2 {
 
         try {
             gerenciamento.removerEstudante(id);
-         
+            System.out.println("Estudante removido com sucesso!");
         } catch (SQLException e) {
             System.out.println("Erro ao remover estudante: " + e.getMessage());
         }
